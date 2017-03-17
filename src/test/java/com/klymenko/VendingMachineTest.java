@@ -1,6 +1,5 @@
 package com.klymenko;
 
-import com.klymenko.core.VendingMachineCoreService;
 import com.klymenko.exception.InsufficientCoinageException;
 import com.klymenko.exception.UnchangeableCoinageException;
 import com.klymenko.model.Coin;
@@ -19,34 +18,8 @@ import java.util.ArrayList;
 public class VendingMachineTest {
 
 	@Autowired
-	private VendingMachineCoreService vendingMachineCoreService;
-
-	@Autowired
 	private VendingMachineService vendingMachineService;
 
-	@Test
-	public void testPossibleCombinations() {
-		Assert.assertEquals(vendingMachineCoreService.possibleCombinations(1).size(), 1);
-		Assert.assertEquals(vendingMachineCoreService.possibleCombinations(2).size(), 2);
-		Assert.assertEquals(vendingMachineCoreService.possibleCombinations(3).size(), 2);
-		Assert.assertEquals(vendingMachineCoreService.possibleCombinations(4).size(), 3);
-		Assert.assertEquals(vendingMachineCoreService.possibleCombinations(5).size(), 4);
-	}
-
-	@Test
-	public void testPossibleCombinationsNull() {
-		Assert.assertEquals(vendingMachineCoreService.possibleCombinations(0).size(), 0);
-	}
-
-	@Test
-	public void testPossibleCombinationsNegative() {
-		Assert.assertEquals(vendingMachineCoreService.possibleCombinations(-1).size(), 0);
-	}
-
-	@Test(expected = OutOfMemoryError.class)
-	public void testPossibleCombinationsBigNumber() {
-		Assert.assertEquals(vendingMachineCoreService.possibleCombinations(Integer.MAX_VALUE).size(), 0);
-	}
 
 	@Test
 	public void testGetChangeForReadsWritesToFile() {

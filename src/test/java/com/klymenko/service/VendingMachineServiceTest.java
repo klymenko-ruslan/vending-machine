@@ -1,7 +1,6 @@
 package com.klymenko.service;
 
 import com.klymenko.VendingMachineApplication;
-import com.klymenko.core.VendingMachineCoreService;
 import com.klymenko.exception.InsufficientCoinageException;
 import com.klymenko.exception.UnchangeableCoinageException;
 import com.klymenko.model.Coin;
@@ -31,16 +30,7 @@ public class VendingMachineServiceTest {
     private VendingMachineService vendingMachineService;
 
     @Autowired
-    private VendingMachineCoreService vendingMachineCoreService;
-
-    @Autowired
     private PropertiesService propertiesService;
-
-    @Bean
-    @Primary
-    public VendingMachineCoreService vendingMachineCoreService() {
-        return Mockito.mock(VendingMachineCoreService.class);
-    }
 
     @Bean
     @Primary
@@ -50,26 +40,6 @@ public class VendingMachineServiceTest {
 
     @Test
     public void testOptimalChangeFor() {
-        Mockito.when(vendingMachineCoreService.possibleCombinations(1))
-                .thenReturn(new TreeSet<List<Integer>>((thisObj, thatObj) -> Integer.compare(thisObj.size(), thatObj.size())){
-                    {
-                        add(new ArrayList<Integer>(){
-                            {
-                                add(1);
-                            }
-                        });
-                        add(new ArrayList<Integer>(){
-                            {
-                                add(2);
-                            }
-                        });
-                        add(new ArrayList<Integer>(){
-                            {
-                                add(5);
-                            }
-                        });
-                    }
-                });
 
         List<Coin> onePenny = new ArrayList<Coin>() {
                                                         {
@@ -81,29 +51,12 @@ public class VendingMachineServiceTest {
 
     @Test(expected = UnchangeableCoinageException.class)
     public void testOptimalChangeForEmpty() {
-        Mockito.when(vendingMachineCoreService.possibleCombinations(2))
-                .thenReturn(new TreeSet<List<Integer>>((thisObj, thatObj) -> Integer.compare(thisObj.size(), thatObj.size())));
-        vendingMachineService.getOptimalChangeFor(2);
+        vendingMachineService.getOptimalChangeFor(0);
     }
 
-    @Test(expected = UnchangeableCoinageException.class)
-    public void testOptimalChangeForOvercached() {
-        vendingMachineService.getOptimalChangeFor(vendingMachineService.cacheArraySize);
-    }
 
     @Test
     public void testChangeFor() {
-        Mockito.when(vendingMachineCoreService.possibleCombinations(3))
-               .thenReturn(new TreeSet<List<Integer>>((thisObj, thatObj) -> Integer.compare(thisObj.size(), thatObj.size())){
-                   {
-                       add(new ArrayList<Integer>(){
-                           {
-                               add(2);
-                               add(1);
-                           }
-                       });
-                   }
-               });
         Mockito.when(propertiesService.loadProperties())
                .thenReturn(getProperties());
         ArrayList<Coin> coins = new ArrayList<Coin>(){
@@ -117,31 +70,11 @@ public class VendingMachineServiceTest {
 
     @Test
     public void testChangeForSecondCombination() {
-        Mockito.when(vendingMachineCoreService.possibleCombinations(4))
-                .thenReturn(new TreeSet<List<Integer>>((thisObj, thatObj) -> Integer.compare(thisObj.size(), thatObj.size())){
-                    {
-                        add(new ArrayList<Integer>(){
-                            {
-                                add(2);
-                                add(2);
-                            }
-                        });
-                        add(new ArrayList<Integer>(){
-                            {
-                                add(1);
-                                add(1);
-                                add(1);
-                                add(1);
-                            }
-                        });
-                    }
-                });
         Mockito.when(propertiesService.loadProperties())
                 .thenReturn(getProperties());
         ArrayList<Coin> coins = new ArrayList<Coin>(){
             {
-                add(Coin.ONE_PENNY);
-                add(Coin.ONE_PENNY);
+                add(Coin.TWO_PENCE);
                 add(Coin.ONE_PENNY);
                 add(Coin.ONE_PENNY);
             }
@@ -151,8 +84,6 @@ public class VendingMachineServiceTest {
 
     @Test(expected = InsufficientCoinageException.class)
     public void testChangeForInsufficientCoinage() {
-        Mockito.when(vendingMachineCoreService.possibleCombinations(300))
-                .thenReturn(new TreeSet<List<Integer>>((thisObj, thatObj) -> Integer.compare(thisObj.size(), thatObj.size())));
         Mockito.when(propertiesService.loadProperties())
                 .thenReturn(getProperties());
         vendingMachineService.getChangeFor(300);
