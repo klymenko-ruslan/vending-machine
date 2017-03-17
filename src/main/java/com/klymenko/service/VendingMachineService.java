@@ -6,8 +6,6 @@ import com.klymenko.exception.UnchangeableCoinageException;
 import com.klymenko.model.Coin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,58 +15,71 @@ import java.util.stream.Collectors;
 @Service
 public class VendingMachineService {
 
-    @Autowired
     private VendingMachineCoreService vendingMachineCoreService;
 
+    private PropertiesService propertiesService;
+
+    public final int cacheArraySize = 10_000;
+
+    private TreeSet<List<Integer>> [] cachedPossibleCombinations = new TreeSet[cacheArraySize];;
+
+
+    @Autowired
+    public VendingMachineService(VendingMachineCoreService vendingMachineCoreService, PropertiesService propertiesService) {
+        this.vendingMachineCoreService = vendingMachineCoreService;
+        this.propertiesService = propertiesService;
+    }
+
+
     public Collection<Coin> getOptimalChangeFor(int pence) {
-        return vendingMachineCoreService.possibleCombinations(pence)
-                                        .stream()
-                                        .findFirst()
-                                        .orElseThrow(() -> new UnchangeableCoinageException("Unchangeable coinage!"))
-                                        .stream()
-                                        .map(Coin::valueOf)
-                                        .collect(Collectors.toList());
+        updateCachedCombinations(pence);
+        return cachedPossibleCombinations[pence].stream()
+                                                .findFirst()
+                                                .orElseThrow(() -> new UnchangeableCoinageException("Unchangeable coinage!"))
+                                                .stream()
+                                                .map(Coin::valueOf)
+                                                .collect(Collectors.toList());
     }
 
     public synchronized Collection<Coin> getChangeFor(int pence) {
-        Properties availableCoinsProperties = loadProperties();
-        outer:
-        for(Collection<Integer> combination : vendingMachineCoreService.possibleCombinations(pence)) {
-            Properties availableCoinsPropertiesCopy = (Properties) availableCoinsProperties.clone();
-            for(Integer combinationValue : combination) {
-                String combinationValueStr = String.valueOf(combinationValue);
-                if(availableCoinsPropertiesCopy.get(combinationValueStr) != null &&
-                        Integer.valueOf((String)availableCoinsPropertiesCopy.get(combinationValueStr)) >= 1) {
-                    String newValue = String.valueOf(Integer.valueOf((String)availableCoinsPropertiesCopy.get(combinationValueStr)) - 1);
-                    availableCoinsPropertiesCopy.put(combinationValueStr, newValue);
-                } else {
-                    continue outer;
+        updateCachedCombinations(pence);
+        if(cachedPossibleCombinations[pence] != null) {
+            Properties availableCoinsProperties = propertiesService.loadProperties();
+            for (Collection<Integer> combination : cachedPossibleCombinations[pence]) {
+                Properties availableCoinsPropertiesCopy = (Properties) availableCoinsProperties.clone();
+                boolean isAccessibleCombination = true;
+                for (Integer combinationValue : combination) {
+                    String combinationValueStr = String.valueOf(combinationValue);
+                    String coinAmountStringified = (String) availableCoinsPropertiesCopy.get(combinationValueStr);
+                    if (coinAmountStringified != null && Integer.valueOf(coinAmountStringified) > 0) {
+                        int coinAmount = Integer.valueOf(coinAmountStringified);
+                        availableCoinsPropertiesCopy.put(combinationValueStr, String.valueOf(coinAmount - 1));
+                    } else {
+                        isAccessibleCombination = false;
+                    }
+                }
+                if (isAccessibleCombination) {
+                    propertiesService.updateProperties(availableCoinsPropertiesCopy);
+                    return combination.stream()
+                            .map(Coin::valueOf)
+                            .collect(Collectors.toList());
                 }
             }
-            updateProperties(availableCoinsPropertiesCopy);
-            return combination.stream()
-                              .map(Coin::valueOf)
-                              .collect(Collectors.toList());
-        }
-        throw new InsufficientCoinageException("Insufficient coinage!");
-    }
-
-    private void updateProperties(Properties availableCoinsPropertiesCopy) {
-        String filePath = this.getClass().getClassLoader().getResource("coin-inventory.properties").getFile();
-        try(FileOutputStream fos = new FileOutputStream(new File(filePath))) {
-            availableCoinsPropertiesCopy.store(fos, "");
-        } catch(IOException e) {
-            throw new RuntimeException();
+            throw new InsufficientCoinageException("Insufficient coinage!");
+        } else {
+            throw new UnchangeableCoinageException("There's no coin combinations!");
         }
     }
 
-    private Properties loadProperties() {
-        try(InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("coin-inventory.properties")) {
-            Properties properties = new Properties();
-            properties.load(inputStream);
-            return properties;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    private synchronized void updateCachedCombinations(int pence) {
+        if(pence < 0) {
+            throw new UnchangeableCoinageException("Pence amount couldn't be negative!");
+        }
+        if(pence >= cachedPossibleCombinations.length) {
+            throw new UnchangeableCoinageException("Pence amount couldn't be larger than "+ cacheArraySize +"!");
+        }
+        if(cachedPossibleCombinations[pence] == null) {
+            cachedPossibleCombinations[pence] = vendingMachineCoreService.possibleCombinations(pence);
         }
     }
 }

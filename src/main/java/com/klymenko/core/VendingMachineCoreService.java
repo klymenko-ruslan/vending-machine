@@ -31,7 +31,7 @@ public class VendingMachineCoreService {
                     combination.add(coins[i].getDenomination());
                 }
             }
-            if(combination.size() != 0) {
+            if(!combination.isEmpty()) {
                 possibleCombinations.add(combination);
             }
         } else if(startIndex == coins.length - 1) {

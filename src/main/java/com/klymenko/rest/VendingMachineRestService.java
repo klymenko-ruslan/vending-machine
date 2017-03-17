@@ -20,21 +20,30 @@ import java.util.Collection;
 @RestController
 public class VendingMachineRestService {
 
-    @Autowired
     private VendingMachineService vendingMachineService;
 
-    @RequestMapping("/optimal-change/{pence}")
+    public static final String OPTIMAL_CHANGE_URL = "/optimal-change/";
+
+    public static final String CHANGE_URL = "/change/";
+
+    @Autowired
+    public VendingMachineRestService(VendingMachineService vendingMachineService) {
+        this.vendingMachineService = vendingMachineService;
+    }
+
+    @RequestMapping(OPTIMAL_CHANGE_URL + "{pence}")
     public Collection<Coin> getOptimalChangeFor(@PathVariable int pence) {
+
         return vendingMachineService.getOptimalChangeFor(pence);
     }
 
-    @RequestMapping("/change/{pence}")
+    @RequestMapping(CHANGE_URL + "{pence}")
     public Collection<Coin> getChangeFor(@PathVariable int pence) {
         return vendingMachineService.getChangeFor(pence);
     }
 
     @ExceptionHandler({InsufficientCoinageException.class, UnchangeableCoinageException.class})
     public ResponseEntity<String> handleException(RuntimeException exception) {
-        return new ResponseEntity<String>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }

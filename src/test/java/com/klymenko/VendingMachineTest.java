@@ -1,9 +1,10 @@
-package com.klymenko.service;
+package com.klymenko;
 
 import com.klymenko.core.VendingMachineCoreService;
 import com.klymenko.exception.InsufficientCoinageException;
 import com.klymenko.exception.UnchangeableCoinageException;
 import com.klymenko.model.Coin;
+import com.klymenko.service.VendingMachineService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
