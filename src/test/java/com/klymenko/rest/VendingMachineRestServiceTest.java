@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -42,11 +43,8 @@ public class VendingMachineRestServiceTest {
 
     @Test
     public void testGetOptimalChangeFor() throws Exception {
-        when(vendingMachineService.getOptimalChangeFor(1)).thenReturn(new ArrayList<Coin>(){
-            {
-                add(Coin.ONE_PENNY);
-            }
-        });
+        when(vendingMachineService.getOptimalChangeFor(1))
+                .thenReturn(Arrays.asList(new Coin[]{Coin.ONE_PENNY}));
 
         String response = mockMvc.perform(MockMvcRequestBuilders.get(VendingMachineRestService.OPTIMAL_CHANGE_URL + "1"))
                                  .andExpect(status().isOk())
@@ -66,11 +64,8 @@ public class VendingMachineRestServiceTest {
 
     @Test
     public void testGetChangeFor() throws Exception {
-        when(vendingMachineService.getChangeFor(1)).thenReturn(new ArrayList<Coin>(){
-            {
-                add(Coin.ONE_PENNY);
-            }
-        });
+        when(vendingMachineService.getChangeFor(1))
+           .thenReturn(Arrays.asList(new Coin[]{Coin.ONE_PENNY}));
 
         String response = mockMvc.perform(MockMvcRequestBuilders.get(VendingMachineRestService.CHANGE_URL + "1"))
                 .andExpect(status().isOk())

@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -22,141 +23,46 @@ public class VendingMachineTest {
 
 
 	@Test
-	public void testGetChangeForReadsWritesToFile() {
-		Assert.assertEquals(vendingMachineService.getChangeFor(100), new ArrayList<Coin>() {
-			{
-				add(Coin.ONE_POUND);
-			}
-		});
-		Assert.assertEquals(vendingMachineService.getChangeFor(50), new ArrayList<Coin>() {
-			{
-				add(Coin.FIFTY_PENCE);
-			}
-		});
-		Assert.assertEquals(vendingMachineService.getChangeFor(20), new ArrayList<Coin>() {
-			{
-				add(Coin.TWENTY_PENCE);
-			}
-		});
-		Assert.assertEquals(vendingMachineService.getChangeFor(10), new ArrayList<Coin>() {
-			{
-				add(Coin.TEN_PENCE);
-			}
-		});
-		Assert.assertEquals(vendingMachineService.getChangeFor(5), new ArrayList<Coin>() {
-			{
-				add(Coin.FIVE_PENCE);
-			}
-		});
-		Assert.assertEquals(vendingMachineService.getChangeFor(2), new ArrayList<Coin>() {
-			{
-				add(Coin.TWO_PENCE);
-			}
-		});
-		Assert.assertEquals(vendingMachineService.getChangeFor(1), new ArrayList<Coin>() {
-			{
-				add(Coin.ONE_PENNY);
-			}
-		});
+	public void testGetChangeForReadsWritesToFilePound() {
+		for(Coin coin : Coin.values()) {
+			Assert.assertEquals(vendingMachineService.getChangeFor(coin.getDenomination()), Arrays.asList(new Coin[]{coin}));
 
-		try {
-			Assert.assertEquals(vendingMachineService.getChangeFor(100), new ArrayList<Coin>() {
-				{
-					add(Coin.ONE_POUND);
-				}
-			});
-			Assert.fail("InsufficientCoinageException should be thrown");
-		} catch(InsufficientCoinageException e) {}
-		try {
-			Assert.assertEquals(vendingMachineService.getChangeFor(50), new ArrayList<Coin>() {
-				{
-					add(Coin.FIFTY_PENCE);
-				}
-			});
-			Assert.fail("InsufficientCoinageException should be thrown");
-		} catch(InsufficientCoinageException e) {}
-		try {
-			Assert.assertEquals(vendingMachineService.getChangeFor(20), new ArrayList<Coin>() {
-				{
-					add(Coin.TWENTY_PENCE);
-				}
-			});
-			Assert.fail("InsufficientCoinageException should be thrown");
-		} catch(InsufficientCoinageException e) {}
-		try {
-			Assert.assertEquals(vendingMachineService.getChangeFor(10), new ArrayList<Coin>() {
-				{
-					add(Coin.TEN_PENCE);
-				}
-			});
-			Assert.fail("InsufficientCoinageException should be thrown");
-		} catch(InsufficientCoinageException e) {}
-		try {
-			Assert.assertEquals(vendingMachineService.getChangeFor(5), new ArrayList<Coin>() {
-				{
-					add(Coin.FIVE_PENCE);
-				}
-			});
-			Assert.fail("InsufficientCoinageException should be thrown");
-		} catch(InsufficientCoinageException e) {}
-		try {
-			Assert.assertEquals(vendingMachineService.getChangeFor(2), new ArrayList<Coin>() {
-				{
-					add(Coin.TWO_PENCE);
-				}
-			});
-			Assert.fail("InsufficientCoinageException should be thrown");
-		} catch(InsufficientCoinageException e) {}
-		try {
-			Assert.assertEquals(vendingMachineService.getChangeFor(1), new ArrayList<Coin>() {
-				{
-					add(Coin.ONE_PENNY);
-				}
-			});
-			Assert.fail("InsufficientCoinageException should be thrown");
-		} catch(InsufficientCoinageException e) {}
+			try {
+				Assert.assertEquals(vendingMachineService.getChangeFor(coin.getDenomination()), Arrays.asList(new Coin[]{coin}));
+				Assert.fail("InsufficientCoinageException should be thrown");
+			} catch (InsufficientCoinageException e) {
+			}
+		}
 	}
 
 	@Test
-	public void testGetOptimalChangeFor() {
-		Assert.assertEquals(vendingMachineService.getOptimalChangeFor(1), new ArrayList<Coin>() {
-			{
-				add(Coin.ONE_PENNY);
-			}
-		});
-		Assert.assertEquals(vendingMachineService.getOptimalChangeFor(2), new ArrayList<Coin>() {
-			{
-				add(Coin.TWO_PENCE);
-			}
-		});
-		Assert.assertEquals(vendingMachineService.getOptimalChangeFor(3), new ArrayList<Coin>() {
-			{
-				add(Coin.TWO_PENCE);
-				add(Coin.ONE_PENNY);
-			}
-		});
-		Assert.assertEquals(vendingMachineService.getOptimalChangeFor(9), new ArrayList<Coin>() {
-			{
-				add(Coin.FIVE_PENCE);
-				add(Coin.TWO_PENCE);
-				add(Coin.TWO_PENCE);
-			}
-		});
-		Assert.assertEquals(vendingMachineService.getOptimalChangeFor(19), new ArrayList<Coin>() {
-			{
-				add(Coin.TEN_PENCE);
-				add(Coin.FIVE_PENCE);
-				add(Coin.TWO_PENCE);
-				add(Coin.TWO_PENCE);
-			}
-		});
-		Assert.assertEquals(vendingMachineService.getOptimalChangeFor(103), new ArrayList<Coin>() {
-			{
-				add(Coin.ONE_POUND);
-				add(Coin.TWO_PENCE);
-				add(Coin.ONE_PENNY);
-			}
-		});
+	public void testGetOptimalChangeForPenny() {
+		Assert.assertEquals(vendingMachineService.getOptimalChangeFor(1), Arrays.asList(new Coin[]{Coin.ONE_PENNY}));
+	}
+
+	@Test
+	public void testGetOptimalChangeForTwoPence() {
+		Assert.assertEquals(vendingMachineService.getOptimalChangeFor(2), Arrays.asList(new Coin[]{Coin.TWO_PENCE}));
+	}
+
+	@Test
+	public void testGetOptimalChangeForThreePence() {
+		Assert.assertEquals(vendingMachineService.getOptimalChangeFor(3), Arrays.asList(new Coin[]{Coin.TWO_PENCE, Coin.ONE_PENNY}));
+	}
+
+	@Test
+	public void testGetOptimalChangeForNinePences() {
+		Assert.assertEquals(vendingMachineService.getOptimalChangeFor(9), Arrays.asList(new Coin[]{Coin.FIVE_PENCE, Coin.TWO_PENCE, Coin.TWO_PENCE}));
+	}
+
+	@Test
+	public void testGetOptimalChangeForNineteenPences() {
+		Assert.assertEquals(vendingMachineService.getOptimalChangeFor(19), Arrays.asList(new Coin[]{Coin.TEN_PENCE, Coin.FIVE_PENCE, Coin.TWO_PENCE, Coin.TWO_PENCE}));
+	}
+
+	@Test
+	public void testGetOptimalChangeForOneHundredThreePences() {
+		Assert.assertEquals(vendingMachineService.getOptimalChangeFor(103), Arrays.asList(new Coin[]{Coin.ONE_POUND, Coin.TWO_PENCE, Coin.ONE_PENNY}));
 	}
 
 	@Test(expected = UnchangeableCoinageException.class)

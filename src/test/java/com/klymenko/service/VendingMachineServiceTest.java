@@ -15,9 +15,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.TreeSet;
 
 /**
  * Created by Unicorn on 16.03.2017.
@@ -40,12 +40,7 @@ public class VendingMachineServiceTest {
 
     @Test
     public void testOptimalChangeFor() {
-
-        List<Coin> onePenny = new ArrayList<Coin>() {
-                                                        {
-                                                            add(Coin.ONE_PENNY);
-                                                        }
-                                                    };
+        List<Coin> onePenny = Arrays.asList(new Coin[]{Coin.ONE_PENNY});
         Assert.assertEquals(onePenny, vendingMachineService.getOptimalChangeFor(1));
     }
 
@@ -59,27 +54,15 @@ public class VendingMachineServiceTest {
     public void testChangeFor() {
         Mockito.when(propertiesService.loadProperties())
                .thenReturn(getProperties());
-        ArrayList<Coin> coins = new ArrayList<Coin>(){
-            {
-                add(Coin.TWO_PENCE);
-                add(Coin.ONE_PENNY);
-            }
-        };
-        Assert.assertEquals(coins, vendingMachineService.getChangeFor(3));
+        Assert.assertEquals(Arrays.asList(new Coin[]{Coin.TWO_PENCE, Coin.ONE_PENNY}), vendingMachineService.getChangeFor(3));
     }
 
     @Test
     public void testChangeForSecondCombination() {
         Mockito.when(propertiesService.loadProperties())
                 .thenReturn(getProperties());
-        ArrayList<Coin> coins = new ArrayList<Coin>(){
-            {
-                add(Coin.TWO_PENCE);
-                add(Coin.ONE_PENNY);
-                add(Coin.ONE_PENNY);
-            }
-        };
-        Assert.assertEquals(coins, vendingMachineService.getChangeFor(4));
+        Assert.assertEquals(Arrays.asList(new Coin[]{Coin.TWO_PENCE, Coin.ONE_PENNY, Coin.ONE_PENNY}),
+                            vendingMachineService.getChangeFor(4));
     }
 
     @Test(expected = InsufficientCoinageException.class)
